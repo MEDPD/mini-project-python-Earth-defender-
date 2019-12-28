@@ -1,0 +1,1 @@
+Earth defender is a game using AI and it's stocking also data to use it for training a ML model 
