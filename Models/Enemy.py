@@ -136,6 +136,7 @@ class enemyGuardian(enemy):
             new_bullet = Bullet.bullet(pygame.image.load('./img/alienBullet.png'), self.x, self.y, 8, 8, mixer.Sound('./sound/laser.wav'))
             new_bullet.fire_sound.play()
             new_bullet.x = new_bullet.x -17
+            new_bullet.y = new_bullet.y -17
             new_bullet.setState("fire")
             self.getBulletsStock().append(new_bullet)
     def keepMeOnTheScreen(self):

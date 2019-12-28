@@ -42,7 +42,7 @@ class bullet:
             self.setState("gone")
     def isCollision(self, target_x, target_y):
         distance = sqrt(pow(target_x - self.x, 2) + pow(target_y - self.y, 2))
-        if distance < 27:
+        if distance < 30:
             return True
         else:
             return False 

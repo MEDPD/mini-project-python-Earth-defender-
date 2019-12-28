@@ -29,7 +29,26 @@ class player:
     def play(self, screen):
         screen.blit(self.img, (self.x, self.y))
                   
-  
+    def initializePlaying(self, e):
+        #! keydown listener
+        if e.type == pygame.KEYDOWN:
+                #! movements listener
+                if e.key == pygame.K_LEFT:
+                    self.moveLeft()
+                elif e.key == pygame.K_RIGHT:
+                    self.moveRight()
+                if e.key == pygame.K_UP:
+                    self.moveUp()
+                elif e.key == pygame.K_DOWN:
+                    self.moveDown()
+                #! fires listener
+                if e.key == pygame.K_SPACE:
+                    self.fire()
+            #! keydup listener
+        elif e.type == pygame.KEYUP:
+            self.stopMoving()
+
+
     def initializeFire(self, screen, enemies):
         for blt in self._bulletStock:
             if blt.getState() is "fire":
