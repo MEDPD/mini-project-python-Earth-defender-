@@ -1,5 +1,5 @@
 import random
-
+from math import *
 import pygame
 from pygame import mixer 
 
@@ -12,6 +12,7 @@ LEFT = "LEFT"
 RIGHT = "RIGHT" 
 
 class enemy:
+    
     def __init__(self, img, x, y, dx, dy, death_sound):
         self.img = img
         self.x = x
@@ -21,42 +22,93 @@ class enemy:
         self.state = "alive"
         self.death_sound = death_sound
         self._position = UP
-        self._classTime = 2*1000 # 2sec
+    
     def getBulletsStock(self):
         return self._bulletStock
+    
     def play(self, screen):
         screen.blit(self.img, (self.x,self.y))
+
     def move(self):
         self._weakMove()
 
     def _weakMove(self):
         self.x += self.dx 
-        if self.x  >= 736:
+        if self.x  >= 550:
             self.dx  = -5
             self.y += self.dy
-        elif self.x  <= 0:
+        elif self.x  <= 250:
             self.dx = 5
             self.y += self.dy
+    def arriveToEarth(self, earthX, earthY):
+        distance = sqrt(pow(earthX - self.x, 2) + pow(earthY - self.y, 2))
+        if distance < 50:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def checkAndAddEnemies(enemies):
+        if pygame.time.get_ticks() % 500 == 0:
+            gx = random.randint(251, 499)
+            gy = -50
+            img = pygame.image.load('./img/enemy.png')
+            sound = mixer.Sound('./sound/explosion.wav')
+            new_enemyG = enemy(img, gx, gy,5, 40, sound)
+            enemies.append(new_enemyG)
+        return enemies
 
 class enemyGuardian(enemy):
     '''
-     blt : bullet
+        blt : bullet
     '''
     def __init__(self, img, x, y, dx, dy, death_sound):
         super(enemyGuardian, self).__init__(img, x, y, dx, dy, death_sound)
         self._bulletStock = []
         self._hasShootingPosition = False
-        # self._movement = "standing"
+
+    @staticmethod
+    def checkAndAddEnemies(enemiesGuardian, playerX, playerY):
+        if pygame.time.get_ticks() % (10*1* 1000) == 0:
+            gx = random.randint(1, 800)
+            gy = random.randint(1, 400)
+
+            while gx > playerX-100 and gx < playerX+100 and gy > playerX+80 and gy < playerY-80:
+               gx = random.randint(1, 800)
+               gy = random.randint(1, 600)
+            img = pygame.image.load('./img/enemyGuardian.png')
+            sound = mixer.Sound('./sound/explosion.wav')
+            new_enemyG = enemyGuardian(img, gx, gy,5, 40, sound)
+            enemiesGuardian.append(new_enemyG)
+        return enemiesGuardian
+    
+    @staticmethod
+    def keepProducingGuardians(enemiesGuardian, playerX, playerY):
+        if len(enemiesGuardian) <= 1:
+            gx = random.randint(1, 800)
+            gy = random.randint(1, 300)
+
+            while gx > playerX-100 and gx < playerX+100 and gy > playerX+80 and gy < playerY-80:
+               gx = random.randint(1, 800)
+               gy = random.randint(1, 600)
+            img = pygame.image.load('./img/enemyGuardian.png')
+            sound = mixer.Sound('./sound/explosion.wav')
+            new_enemyG = enemyGuardian(img, gx, gy,5, 40, sound)
+            enemiesGuardian.append(new_enemyG)
+        return enemiesGuardian
 
     def stopMoving(self):
         # print('calling stopMoving')
         self.dx = 0
         self.dy = 0
+    
     def play(self, screen):
         screen.blit(self.img, (self.x,self.y))
+    
     def move(self):
         self.x += self.dx
         self.y += self.dy
+            
     def initializeFire(self, screen, HumanPlayer):
         for blt in self._bulletStock:
             if blt.getState() is "fire":
@@ -66,36 +118,33 @@ class enemyGuardian(enemy):
                 if blt in self._bulletStock:
                     self._bulletStock.remove(blt)
                     HumanPlayer.setState("dead")
+    
     def locateShootingPlace(self, px, py): 
         if (px >= self.x +2 or px <= self.x -2) and (py >= self.y +2 or py <= self.y -2):
-            
-            # print("mov", self.x, self.y)
-            
             if abs(px - self.x) < abs(py - self.y):
-                # print("mova<b", abs(px - self.x), abs(py - self.y))
                 if px > self.x:         
                     self.moveRight()
                 elif px < self.x:
                     self.moveLeft()   
             elif abs(px - self.x) > abs(py - self.y):
-                # print("mova>b", abs(px - self.x), abs(py - self.y))
                 if py > self.y:
                     self.moveDown()
                 elif py < self.y:
                     self.moveUp()
+
             self._hasShootingPosition = False
         elif (px <= self.x +2 and px >= self.x -2) or (py <= self.y +2 and py >= self.y -2):
-            # print("stop")
             self.stopMoving()
             if not self._hasShootingPosition:
-                # print('tkShoot')
                 self.takeShootingPosition(px=px, py=py)
                 self._hasShootingPosition = True
 
             self.fire()
+    
     def initializePlaying(self, px, py):
         self.locateShootingPlace(px, py)
 
+    
     def takeShootingPosition(self, px, py):
         if (px <= self.x +2 and px >= self.x -2):
             if self.y > py:
@@ -139,6 +188,7 @@ class enemyGuardian(enemy):
             new_bullet.y = new_bullet.y -17
             new_bullet.setState("fire")
             self.getBulletsStock().append(new_bullet)
+    
     def keepMeOnTheScreen(self):
         # print('calling keepMeOnTheScreen')
         if self.x >= 700:
@@ -149,6 +199,7 @@ class enemyGuardian(enemy):
             self.y = 520
         if self.y < 0:
             self.y = 0
+    
     def moveLeft(self):
         if self._position is not LEFT:
             if self._position is DOWN:
@@ -161,6 +212,7 @@ class enemyGuardian(enemy):
             # print('pos : left')
         self.dx = -2
         self.dy = 0
+    
     def moveRight(self):
         if self._position is not RIGHT:
             if self._position is LEFT:
@@ -172,6 +224,7 @@ class enemyGuardian(enemy):
             self._position = RIGHT
         self.dx = 2
         self.dy = 0
+    
     def moveUp(self):
         if self._position is not UP:
              if self._position is DOWN:
@@ -183,6 +236,7 @@ class enemyGuardian(enemy):
              self._position = UP
         self.dy = -2
         self.dx = 0
+    
     def moveDown(self):
         if self._position is not DOWN:
             if self._position is UP:

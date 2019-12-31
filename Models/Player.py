@@ -20,6 +20,8 @@ class player:
         self._position = UP
         self._bulletStock = []
         self._state = "alive"
+        self.data = {LEFT: [0],RIGHT: [0], UP: [0], DOWN: [0]}
+        self.dataMoves = [[], []]
     def getBulletsStock(self):
         return self._bulletStock
     def getState(self):
@@ -57,12 +59,6 @@ class player:
                 if blt.isCollision(e.x , e.y):
                     if blt in self._bulletStock:
                         self._bulletStock.remove(blt)
-                    # if len(enemies) <= 2 and not Bullet.bullet.kill:
-                    #     new_one = Enemy.enemy(pygame.image.load('./img/enemy.png'), random.randint(1, 800), random.randint(1, 50), 5, 40, mixer.Sound('./sound/explosion.wav'))
-                    #     enemies.append(new_one)
-                    #     e.x  = random.randint(1, 736)
-                    #     e.y = random.randint(1, 50)
-                    # else:
                     Bullet.bullet.kill = True
                     if e in enemies:
                         e.death_sound.play()
@@ -73,12 +69,30 @@ class player:
         blt.fire_bullet(self._position, screen)
 
     def fire(self):
+        self.data[self._position][0] += 1 
         new_bullet = Bullet.bullet(pygame.image.load('./img/bullet.png'), self.x, self.y, 8, 8, mixer.Sound('./sound/laser.wav'))
         new_bullet.fire_sound.play()
         new_bullet.setState("fire")
-        self.getBulletsStock().append(new_bullet)
 
-    
+
+        self.getBulletsStock().append(new_bullet)
+    def stopMoving(self):
+        self.dx = 0
+        self.dy = 0
+    def move(self):
+        self.x += self.dx
+        self.y += self.dy
+        self.dataMoves[0].append(self.x)
+        self.dataMoves[1].append(600 - self.y)
+    def keepMeOnTheScreen(self):
+        if self.x >= 700:
+            self.x = 700
+        if self.x < 0:
+            self.x = 0
+        if self.y >= 520:
+            self.y = 520
+        if self.y < 0:
+            self.y = 0
     
     def moveLeft(self):
         if self._position is not LEFT:
@@ -124,20 +138,5 @@ class player:
             self._position = DOWN
         self.dy = 4
         self.dx = 0
-    def stopMoving(self):
-        self.dx = 0
-        self.dy = 0
-    def move(self):
-        self.x += self.dx
-        self.y += self.dy
-    def keepMeOnTheScreen(self):
-        if self.x >= 700:
-            self.x = 700
-        if self.x < 0:
-            self.x = 0
-        if self.y >= 520:
-            self.y = 520
-        if self.y < 0:
-            self.y = 0
-
+    
     

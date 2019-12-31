@@ -1,1 +1,1 @@
-Earth defender is a game using AI and it's stocking also data to use it for training a ML model 
+Earth defender is a pyhton game using narrow AI, and it's storing data to use it for training a ML model 
